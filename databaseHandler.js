@@ -30,8 +30,9 @@ exports.createTables = function(conData, callback){
 	con.query(sql, function(err, result) {
 	    sql = "INSERT INTO Users VALUES ('admin','password','admin@gmail.com');"
 	    con.query(sql, function(err, result) {
+		con.end()
 		callback(err, result)
 	    })
         })
-    })   
+    })
 }

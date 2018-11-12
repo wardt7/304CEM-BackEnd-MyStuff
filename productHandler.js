@@ -21,6 +21,7 @@ exports.addProduct = function(conData, req, callback){
 	    author: req.body['author']
 	}
 	data.query('INSERT INTO Products SET ?', product, function(err, result){
+	    data.end()
 	    callback(err, ID)
 	})
     })
@@ -38,7 +39,7 @@ exports.addImage = function(conData, fileData, callback){
 	    console.log("connected")
 	    sql = "UPDATE Products SET img = ? WHERE productID = ?;"
 	    data.query(sql, [routeUrl, fileData.ID], function(err, result){
-		console.log(err)
+		data.end()		
 		callback(err, fileData.ID)
 	    })
 	})
@@ -57,6 +58,7 @@ exports.getAllProducts = function(conData, queryData, callback){
 		callback(err)
 		return
 	    }
+	    data.end()
 	    var JSONToReturn = { "content": [] }
 	    result.forEach(function(item){
 		var product = {
