@@ -28,6 +28,7 @@ exports.addProduct = function(conData, req, callback){
 
 exports.addImage = function(conData, fileData, callback){
     var newUrl = `public/images/${fileData.ID}.jpg`
+    var routeUrl = `http://localhost:8080/products/images/${fileData.ID}.jpg`
     fs.rename(fileData.currentUrl, newUrl, function(err){
 	db.connect(conData, function(err, data){
 	    if (err) {
@@ -36,13 +37,47 @@ exports.addImage = function(conData, fileData, callback){
 	    }
 	    console.log("connected")
 	    sql = "UPDATE Products SET img = ? WHERE productID = ?;"
-	    data.query(sql, [newUrl, fileData.ID], function(err, result){
+	    data.query(sql, [routeUrl, fileData.ID], function(err, result){
 		console.log(err)
 		callback(err, fileData.ID)
 	    })
 	})
     })
 }
+
+exports.getAllProducts = function(conData, queryData, callback){
+    db.connect(conData, function(err, data){
+	if (err) {
+	    callback(err)
+	    return
+	}
+	sql = "SELECT * FROM Products;"
+	data.query(sql, function(err, result){
+	    if (err) {
+		callback(err)
+		return
+	    }
+	    var JSONToReturn = { "content": [] }
+	    result.forEach(function(item){
+		var product = {
+		    "productID": item.productID,
+		    "title": item.title,
+		    "location": item.location,
+		    "price": item.price,
+		    "description": item.description,
+		    "author": item.author,
+		    "links": [ {
+			"rel": "self",
+			"href": item.img
+		    } ],
+		}
+		JSONToReturn.content.push(product)
+	    })
+	    callback(err, JSONToReturn)
+	})
+    })
+}
+	
 	    
 	    
 	    

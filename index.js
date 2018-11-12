@@ -9,7 +9,6 @@ var app = express();
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true}))
-app.use(express.static('public'))
 
 
 app.engine('html', es6Renderer)
@@ -30,8 +29,10 @@ app.use(function(req, res, next){
     next()
 })
 
+app.use(express.static('public'))
+
 app.post('/products',upload.single('product'), function (req, res, next) {
-    // req.file is the product file. See multer for details
+    // upload a new product
     ph.addProduct(databaseData, req, function(err, data){
 	if(err){
 	    res.status(400)
@@ -51,6 +52,19 @@ app.post('/products',upload.single('product'), function (req, res, next) {
 		res.end("Added product with image")
 	    }
 	})
+    })
+})
+
+app.get('/products', function (req, res, next) {
+    ph.getAllProducts(databaseData, req, function(err, data){
+	if(err){
+	    res.status(400)
+	    res.end("error:" + err)
+	} else {
+	    res.status(201)
+            res.json(data)
+	    res.end()
+	}
     })
 })
 
