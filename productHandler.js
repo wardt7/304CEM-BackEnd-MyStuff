@@ -1,4 +1,5 @@
 var db = require("./databaseHandler")
+var fs = require("fs")
 var crypto = require("crypto")
 
 exports.addProduct = function(conData, req, callback){
@@ -25,19 +26,20 @@ exports.addProduct = function(conData, req, callback){
     })
 }
 
-exports.addImage = function(conData, ID, callback){
-    console.log("in addimage")
-    db.connect(conData, function(err, data){
-	if (err) {
-	    callback(err)
-	    return
-	}
-	console.log("connected")
-	var url = `public/images/${ID}.jpg`
-	sql = "UPDATE Products SET img = ? WHERE productID = ?;"
-	data.query(sql, [url, ID], function(err, result){
-	    console.log(err)
-	    callback(err, ID)
+exports.addImage = function(conData, fileData, callback){
+    var newUrl = `public/images/${fileData.ID}.jpg`
+    fs.rename(fileData.currentUrl, newUrl, function(err){
+	db.connect(conData, function(err, data){
+	    if (err) {
+		callback(err)
+		return
+	    }
+	    console.log("connected")
+	    sql = "UPDATE Products SET img = ? WHERE productID = ?;"
+	    data.query(sql, [newUrl, fileData.ID], function(err, result){
+		console.log(err)
+		callback(err, fileData.ID)
+	    })
 	})
     })
 }

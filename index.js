@@ -2,7 +2,6 @@ var express = require('express')
 var bodyParser = require('body-parser')
 var multer = require('multer')
 var es6Renderer = require('express-es6-template-engine')
-var fs = require('fs')
 var db = require('./databaseHandler')
 var ph = require('./productHandler')
 var upload = multer({ dest: 'public/images/' });
@@ -38,8 +37,12 @@ app.post('/products',upload.single('product'), function (req, res, next) {
 	    res.status(400)
 	    res.end("error:" + err)
 	}
-	console.log(data)
-	ph.addImage(databaseData, data, function(err, data){
+	console.log(req.file)
+	var fileData = {
+	    "ID": data,
+	    "currentUrl": req.file.path
+	}
+	ph.addImage(databaseData, fileData, function(err, data){
 	    if(err){
 		res.status(400)
 		res.end("error:" + err)
