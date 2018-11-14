@@ -1,9 +1,12 @@
 var express = require('express')
 var bodyParser = require('body-parser')
 var multer = require('multer')
+var jwt = require('jsonwebtoken')
+var config = require('./config')
 var es6Renderer = require('express-es6-template-engine')
 var db = require('./databaseHandler')
 var ph = require('./productHandler')
+var uh = require('./userHandler')
 var upload = multer({ dest: 'public/images/' });
 var app = express();
 
@@ -79,6 +82,28 @@ app.get('/createTables', (req, res) => {
 	res.end("tables made")
     })
 })
+
+app.post('/users', (req, res) => {
+    console.log('got user request')
+    console.log(req.body)
+    uh.createUser(databaseData, req, function(err, data){
+	if(err){
+	    res.status(400)
+            console.log(err)
+	    res.end("error:" + err)
+	} else {
+	    var token = jwt.sign({"username":req.body["username"]}, config.secret, {
+		expiresIn: 86400
+	    })
+            console.log(token)
+	    res.status(200)
+            res.json({"auth": true, "token": token})
+	    res.end()
+	}
+    })
+})
+	    
+    
 
 app.listen(port, err => {
     if (err) {
