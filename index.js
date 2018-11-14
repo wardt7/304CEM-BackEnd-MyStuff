@@ -85,7 +85,6 @@ app.get('/createTables', (req, res) => {
 
 app.post('/users', (req, res) => {
     console.log('got user request')
-    console.log(req.body)
     uh.createUser(databaseData, req, function(err, data){
 	if(err){
 	    res.status(400)
@@ -95,9 +94,25 @@ app.post('/users', (req, res) => {
 	    var token = jwt.sign({"username":req.body["username"]}, config.secret, {
 		expiresIn: 86400
 	    })
-            console.log(token)
 	    res.status(200)
             res.json({"auth": true, "token": token})
+	    res.end()
+	}
+    })
+})
+
+app.post('/users/login', (req, res) => {
+    console.log('logging in')
+    uh.authenticateUser(databaseData, req, function(err, data){
+	if(err){
+	    res.status(401)
+	    res.end("error:" + err)
+	} else {
+	    var token = jwt.sign({"username": req.body["username"]}, config.secret, {
+		expiresIn: 86400
+	    })
+	    res.status(200)
+	    res.json({"auth": true, "token": token})
 	    res.end()
 	}
     })
