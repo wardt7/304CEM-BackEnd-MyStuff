@@ -134,6 +134,26 @@ app.post('/messages', (req, res) => {
 	}
     })
 })
+
+app.get('/messages', (req, res) => {
+    jwt.verify(req.headers.authorization, config.secret, function(err, decoded){
+	if (err){
+	    res.status(401)
+	    res.end("error:" + err)
+	} else {
+	    mh.getMessages(databaseData, decoded.username, function(err, data){
+		if(err){
+		    res.status(500)
+		    res.end("error:" + err)
+		} else {
+		    res.status(200)
+		    res.json(data)
+		    res.end()
+		}
+	    })
+	}
+    })
+})
 	    
     
 

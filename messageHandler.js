@@ -30,4 +30,35 @@ exports.createMessage = function(conData, req, callback){
 	}
     })
 }
+
+exports.getMessages = function(conData, username, callback){
+    db.connect(conData, function(err, conn){
+	if (err) {
+	    callback(err)
+	    return
+	} else {
+	    var sql = "SELECT * FROM Messages WHERE toUser = ?"
+	    conn.query(sql, [username], function(err, result){
+		if (err){
+		    conn.end()
+		    callback(err)
+		} else {
+		    conn.end()
+		    var JSONToReturn = { "content": [] }
+		    result.forEach(function(item){
+			var msg = {
+			    "messageID": item.messageID,
+			    "toUser": item.toUser,
+			    "fromUser": item.fromUser,
+			    "subject": item.subject,
+			    "content": item.content
+			}
+			JSONToReturn.content.push(msg)
+		    })
+		    callback(err, JSONToReturn)
+		}
+	    })
+	}
+    })
+}
 		
