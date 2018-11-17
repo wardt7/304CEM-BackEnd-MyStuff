@@ -7,6 +7,7 @@ var es6Renderer = require('express-es6-template-engine')
 var db = require('./databaseHandler')
 var ph = require('./productHandler')
 var uh = require('./userHandler')
+var mh = require('./messageHandler')
 var upload = multer({ dest: 'public/images/' });
 var app = express();
 
@@ -114,6 +115,28 @@ app.post('/users/login', (req, res) => {
 	    res.status(200)
 	    res.json({"auth": true, "token": token})
 	    res.end()
+	}
+    })
+})
+
+app.post('/messages', (req, res) => {
+    console.log(req.body)
+    jwt.verify(req.body.auth, config.secret, function(err, decoded) {
+	if (err){
+	    res.status(401)
+	    res.end("error:" + err)
+	} else {
+	    mh.createMessage(databaseData, req, function(err, data){
+		if(err){
+		    res.status(500)
+		    res.end("error:" + err)
+		} else {
+		    res.status(201)
+		    res.json({"sentMessage": true})
+		    res.end()
+		    console.log('Success!')
+		}
+	    })
 	}
     })
 })
