@@ -37,7 +37,7 @@ exports.getMessages = function(conData, username, callback){
 	    callback(err)
 	    return
 	} else {
-	    var sql = "SELECT * FROM Messages WHERE toUser = ?"
+	    var sql = "SELECT * FROM Messages WHERE toUser = ? ORDER BY messageID DESC"
 	    conn.query(sql, [username], function(err, result){
 		if (err){
 		    conn.end()
@@ -56,6 +56,26 @@ exports.getMessages = function(conData, username, callback){
 			JSONToReturn.content.push(msg)
 		    })
 		    callback(err, JSONToReturn)
+		}
+	    })
+	}
+    })
+}
+
+exports.deleteMessage = function(conData, id, username, callback){
+    db.connect(conData, function(err, conn){
+	if (err) {
+	    callback(err)
+	    return
+	} else {
+	    var sql = "DELETE FROM Messages WHERE messageID = ? AND toUser = ?"
+	    conn.query(sql, [Number(id), username], function(err, result){
+		if (err){
+		    conn.end()
+		    callback(err)
+		} else {
+		    conn.end()
+		    callback(err, result)
 		}
 	    })
 	}

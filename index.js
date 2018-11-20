@@ -154,6 +154,27 @@ app.get('/messages', (req, res) => {
 	}
     })
 })
+
+app.delete('/messages/:id', (req, res) => {
+    jwt.verify(req.headers.authorization, config.secret, function(err, decoded){
+	if (err){
+	    res.status(401)
+	    res.end("error:" + err)
+	} else {
+	    mh.deleteMessage(databaseData, req.params.id, decoded.username, function(err, data){
+		if(err){
+		    res.status(500)
+		    console.log(err)
+		    res.end("error:" + err)
+		} else {
+		    res.status(200)
+		    res.json({"deleted": true})
+		    res.end()
+		}
+	    })
+	}
+    })
+})
 	    
     
 
