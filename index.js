@@ -9,7 +9,7 @@ var ph = require('./productHandler')
 var uh = require('./userHandler')
 var mh = require('./messageHandler')
 var cors = require('cors')
-var upload = multer({ dest: 'public/images/' });
+var upload = multer({ dest: 'public/products/images' });
 var app = express();
 
 app.use(bodyParser.json())
@@ -56,7 +56,7 @@ app.post('/products',upload.single('product'), function (req, res, next) {
     })
 })
 
-app.get('/products', function (req, res, next) {
+app.get('/products', function (req, res) {
     ph.getAllProducts(databaseData, req, function(err, data){
 	if(err){
 	    res.status(400)
@@ -65,6 +65,27 @@ app.get('/products', function (req, res, next) {
 	    res.status(201)
             res.json(data)
 	    res.end()
+	}
+    })
+})
+
+app.delete('/products/:id', function (req, res) {
+    jwt.verify(req.headers.authorization, config.secret, function(err, decoded) {
+	if (err){
+	    res.status(401)
+	    res.end("error:" + err)
+	} else {
+	    ph.deleteProduct(databaseData, req.params.id, decoded.username, function(err, data) {
+		if (err){
+		    res.status(500)
+                    console.log(err)
+		    res.end("error:" + err)
+		} else {
+		    res.status(200)
+		    res.json({"deleted": true})
+		    res.end()
+		}
+	    })
 	}
     })
 })

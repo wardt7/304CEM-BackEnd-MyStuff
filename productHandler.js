@@ -6,6 +6,7 @@ exports.addProduct = function(conData, req, callback){
     console.log("in addproduct")
     db.connect(conData, function(err, data){
 	if (err) {
+	    data.end()
 	    callback(err)
 	    return
 	}
@@ -21,14 +22,20 @@ exports.addProduct = function(conData, req, callback){
 	    author: req.body['author']
 	}
 	data.query('INSERT INTO Products SET ?', product, function(err, result){
-	    data.end()
-	    callback(err, ID)
+	    if (err) {
+		data.end()
+		callback(err)
+		return
+	    } else {
+		data.end()
+		callback(err, ID)
+	    }
 	})
     })
 }
 
 exports.addImage = function(conData, fileData, callback){
-    var newUrl = `public/images/${fileData.ID}.jpg`
+    var newUrl = `public/products/images/${fileData.ID}.jpg`
     var routeUrl = `http://localhost:8080/products/images/${fileData.ID}.jpg`
     fs.rename(fileData.currentUrl, newUrl, function(err){
 	db.connect(conData, function(err, data){
@@ -39,8 +46,14 @@ exports.addImage = function(conData, fileData, callback){
 	    console.log("connected")
 	    sql = "UPDATE Products SET img = ? WHERE productID = ?;"
 	    data.query(sql, [routeUrl, fileData.ID], function(err, result){
-		data.end()		
-		callback(err, fileData.ID)
+		if (err) {
+		    data.end()
+		    callback(err)
+		    return
+		} else {
+		    data.end()
+		    callback(err, fileData.ID)
+		}
 	    })
 	})
     })
@@ -55,6 +68,7 @@ exports.getAllProducts = function(conData, queryData, callback){
 	sql = "SELECT * FROM Products;"
 	data.query(sql, function(err, result){
 	    if (err) {
+		data.end()
 		callback(err)
 		return
 	    }
@@ -76,6 +90,29 @@ exports.getAllProducts = function(conData, queryData, callback){
 		JSONToReturn.content.push(product)
 	    })
 	    callback(err, JSONToReturn)
+	})
+    })
+}
+
+exports.deleteProduct = function(conData, id, username, callback){
+    db.connect(conData, function(err, conn){
+	if (err) {
+	    callback(err)
+	    return
+	}
+	sql = "DELETE FROM Products WHERE productID = ? AND author = ?"
+	conn.query(sql, [id, username], function(err, result){
+	    if (err) {
+		conn.end()
+		callback(err)
+		return
+	    } else {
+		conn.end()
+		fs.unlink(`public/products/images/${id}.jpg`, function(err){
+		    console.log(err)
+		    callback(null, result)
+		})
+	    }
 	})
     })
 }
