@@ -67,11 +67,12 @@ exports.getAllProducts = function(conData, req, callback){
 	}
 	sql = "SELECT * FROM Products"
 	if(req.query.title){
-	    sql = sql + " WHERE title = ?"
+	    sql = sql + " WHERE LOCATE(?,title) > 0"
 	}
 	conn.query(sql, [req.query.title], function(err, result){
 	    if (err) {
 		conn.end()
+		console.log(err)
 		callback(err)
 		return
 	    }
