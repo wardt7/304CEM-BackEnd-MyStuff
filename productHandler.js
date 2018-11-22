@@ -59,20 +59,23 @@ exports.addImage = function(conData, fileData, callback){
     })
 }
 
-exports.getAllProducts = function(conData, queryData, callback){
-    db.connect(conData, function(err, data){
+exports.getAllProducts = function(conData, req, callback){
+    db.connect(conData, function(err, conn){
 	if (err) {
 	    callback(err)
 	    return
 	}
-	sql = "SELECT * FROM Products;"
-	data.query(sql, function(err, result){
+	sql = "SELECT * FROM Products"
+	if(req.query.title){
+	    sql = sql + " WHERE title = ?"
+	}
+	conn.query(sql, [req.query.title], function(err, result){
 	    if (err) {
-		data.end()
+		conn.end()
 		callback(err)
 		return
 	    }
-	    data.end()
+	    conn.end()
 	    var JSONToReturn = { "content": [] }
 	    result.forEach(function(item){
 		var product = {
