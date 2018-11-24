@@ -32,39 +32,45 @@ app.use(cors())
 
 app.use(express.static('public'))
 
-app.post('/products',upload.single('product'), function (req, res, next) {
-    // upload a new product
-    ph.addProduct(databaseData, req, function(err, data){
-	if(err){
-	    res.status(500)
-	    res.end("error:" + err)
-	}
-	console.log(req.file)
-	var fileData = {
-	    "ID": data,
-	    "currentUrl": req.file.path
-	}
-	ph.addImage(databaseData, fileData, function(err, data){
-	    if(err){
-		res.status(500)
-		res.end("error:" + err)
-	    } else {
-		res.status(201)
-		res.end("Added product with image")
-	    }
-	})
-    })
-})
-
 app.get('/products', function (req, res) {
     ph.getAllProducts(databaseData, req, function(err, data){
 	if(err){
 	    res.status(400)
 	    res.end("error:" + err)
 	} else {
-	    res.status(201)
+	    res.status(200)
             res.json(data)
 	    res.end()
+	}
+    })
+})
+
+app.post('/products',upload.single('product'), function (req, res, next) {
+    // upload a new product
+    jwt.verify(req.headers.authorization, config.secret, function(err, decoded){
+	if(err){
+	    res.status(401)
+	    res.end("error:" + err)
+	} else {
+	    ph.addProduct(databaseData, req, decoded.username, function(err, data){
+		if(err){
+		    res.status(500)
+		    res.end("error:" + err)
+		}
+		var fileData = {
+		    "ID": data,
+		    "currentUrl": req.file.path
+		}
+		ph.addImage(databaseData, fileData, function(err, data){
+		    if(err){
+			res.status(500)
+			res.end("error:" + err)
+		    } else {
+			res.status(201)
+			res.end("Added product with image")
+		    }
+		})
+	    })
 	}
     })
 })
