@@ -9,7 +9,9 @@
     "author": "Toby Ward",
     "license": "ISC",
     "dependencies": {
+        "bcrypt": "^3.0.2",
         "body-parser": "^1.18.3",
+        "cors": "^2.8.5",
         "crypto": "^1.0.1",
         "express": "^4.16.4",
         "express-es6-template-engine": "^2.1.5",

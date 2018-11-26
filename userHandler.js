@@ -1,4 +1,5 @@
 var db = require('./databaseHandler')
+var bcrypt = require('bcrypt')
 
 exports.createUser = function(conData, req, callback){
     if(req.body['password'] !== req.body['rePassword']){
@@ -11,21 +12,28 @@ exports.createUser = function(conData, req, callback){
 	    callback(err)
 	    return
 	}
-        var values = {
-	    username: req.body['username'],
-	    email: req.body['email'],
-	    password: req.body['password']
-    }
-	var sql = "INSERT INTO Users SET ?"
-	conn.query(sql, values, function(err, result){
-	    if(err){
-		conn.end()
+	bcrypt.hash(req.body['password'], 10, function(err, hash){
+	    if (err) {
 		callback(err)
 		return
 	    } else {
-		conn.end()
-		callback(err, result)
-		return
+		var values = {
+		    username: req.body['username'],
+		    email: req.body['email'],
+		    password: hash,
+		}
+		var sql = "INSERT INTO Users SET ?"
+		conn.query(sql, values, function(err, result){
+		    if(err){
+			conn.end()
+			callback(err)
+			return
+		    } else {
+			conn.end()
+			callback(err, result)
+			return
+		    }
+		})
 	    }
 	})
     })
@@ -36,8 +44,8 @@ exports.authenticateUser = function(conData, req, callback){
 	if (err) {
 	    callback(err)
 	} else {
-	    var sql = "SELECT username FROM Users WHERE username = ? AND password = ?"
-	    var data = [req.body['username'], req.body['password']]
+	    var sql = "SELECT username, password FROM Users WHERE username = ?"
+	    var data = req.body['username']
 	    conn.query(sql, data, function(err, result){
 		if(err){
 		    conn.end()
@@ -45,13 +53,21 @@ exports.authenticateUser = function(conData, req, callback){
 		    return
 		} else {
 		    conn.end()
-		    if(result.length === 0){
+		    if(result.length !== 1){
 			var authErr = new Error('Username and Password combination not found!')
 			callback(authErr)
 			return
 		    } else {
-			callback(err, true)
-			return
+			bcrypt.compare(req.body['password'], result[0].password, function(err, res){
+			    if (err || res === false){
+				var authErr = new Error('Username and Password combination not found!')
+				callback(authErr)
+				return
+			    } else {
+				callback(err, true)
+				return
+			    }
+			})
 		    }
 		}
 	    })

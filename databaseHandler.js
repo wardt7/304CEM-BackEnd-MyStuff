@@ -1,4 +1,5 @@
 var mysql = require('mysql')
+var bcrypt = require('bcrypt')
 
 exports.connect = function(conData, callback){
     var con = mysql.createConnection({
@@ -23,7 +24,7 @@ exports.createTables = function(conData, callback){
 	database: conData.database
     })
 
-    var sql = "CREATE TABLE Users (username VARCHAR(255) NOT NULL, password VARCHAR(32) NOT NULL, email VARCHAR(128) NOT NULL, PRIMARY KEY (username))"
+    var sql = "CREATE TABLE Users (username VARCHAR(255) NOT NULL, password CHAR(60) NOT NULL, email VARCHAR(128) NOT NULL, PRIMARY KEY (username))"
     con.query(sql, function(err, result) {
 	if (err) {
 	    con.end()
@@ -47,15 +48,28 @@ exports.createTables = function(conData, callback){
 			    callback(err)
 			    return
 			} else {
-			    sql = "INSERT INTO Users VALUES ('admin','password','admin@gmail.com');"
-			    con.query(sql, function(err, result) {
-				con.end()
+			    var pw = bcrypt.hash('password', 10, function(err, hash){
 				if (err) {
+				    con.end()
 				    callback(err)
 				    return
 				} else {
-				    callback(err, result)
-				    return
+				    var data = {
+					username: "admin",
+					password: hash,
+					email: "admin@gmail.com"
+				    }
+				    sql = "INSERT INTO Users SET ?;"
+				    con.query(sql, data, function(err, result) {
+					con.end()
+					if (err) {
+					    callback(err)
+					    return
+					} else {
+					    callback(err, result)
+					    return
+					}
+				    })
 				}
 			    })
 			}
