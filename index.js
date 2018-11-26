@@ -35,8 +35,9 @@ app.use(express.static('public'))
 app.get('/products', function (req, res) {
     ph.getAllProducts(databaseData, req, function(err, data){
 	if(err){
-	    res.status(400)
-	    res.end("error:" + err)
+	    res.status(500)
+	    res.json({"errMessage": err.message})
+	    res.end()
 	} else {
 	    res.status(200)
             res.json(data)
@@ -50,12 +51,14 @@ app.post('/products',upload.single('product'), function (req, res, next) {
     jwt.verify(req.headers.authorization, config.secret, function(err, decoded){
 	if(err){
 	    res.status(401)
-	    res.end("error:" + err)
+	    res.json({"errMessage": err.message})
+	    res.end()
 	} else {
 	    ph.addProduct(databaseData, req, decoded.username, function(err, data){
 		if(err){
 		    res.status(500)
-		    res.end("error:" + err)
+		    res.json({"errMessage": err.message})
+		    res.end()
 		}
 		var fileData = {
 		    "ID": data,
@@ -64,10 +67,12 @@ app.post('/products',upload.single('product'), function (req, res, next) {
 		ph.addImage(databaseData, fileData, function(err, data){
 		    if(err){
 			res.status(500)
-			res.end("error:" + err)
+			res.json({"errMessage": err.message})
+			res.end()
 		    } else {
 			res.status(201)
-			res.end("Added product with image")
+			res.json({"addedProduct": fileData.ID})
+			res.end()
 		    }
 		})
 	    })
@@ -79,16 +84,17 @@ app.delete('/products/:id', function (req, res) {
     jwt.verify(req.headers.authorization, config.secret, function(err, decoded) {
 	if (err){
 	    res.status(401)
-	    res.end("error:" + err)
+	    res.json({"errMessage": err.message})
+	    res.end()
 	} else {
 	    ph.deleteProduct(databaseData, req.params.id, decoded.username, function(err, data) {
 		if (err){
 		    res.status(500)
-                    console.log(err)
-		    res.end("error:" + err)
+                    res.json({"errMessage": err.message})
+		    res.end()
 		} else {
 		    res.status(200)
-		    res.json({"deleted": true})
+		    res.json({"deletedProduct": req.params.id})
 		    res.end()
 		}
 	    })
@@ -97,14 +103,29 @@ app.delete('/products/:id', function (req, res) {
 })
 
 app.get('/createTables', (req, res) => {
-    db.createTables(databaseData, function(err, state){
-	if(err) {
-	    res.status(500)
-	    res.end("An error has occured:" + err)
-	    return
+    jwt.verify(req.headers.authorization, config.secret, function(err, decoded) {
+	if (err){
+	    res.status(401)
+	    res.json({"errMessage": err.message})
+	    res.end()
+	} else if (decoded.username !== "admin") {
+	    res.status(401)
+	    res.json({"errMessage": "You're not an admin!"})
+	    res.end()
+	} else {
+	    db.createTables(databaseData, function(err, state){
+		if(err) {
+		    res.status(500)
+		    res.json({"errMessage": err.message})
+		    res.end()
+		    return
+		} else {
+		    res.status(201)
+		    res.json({"createdTables": true})
+		    res.end()
+		}
+	    })
 	}
-	res.status(201)
-	res.end("tables made")
     })
 })
 
@@ -112,8 +133,8 @@ app.post('/users', (req, res) => {
     uh.createUser(databaseData, req, function(err, data){
 	if(err){
 	    res.status(500)
-            console.log(err)
-	    res.end("error:" + err)
+            res.json({"errMessage": err.message})
+	    res.end()
 	} else {
 	    var token = jwt.sign({"username":req.body["username"]}, config.secret, {
 		expiresIn: 86400
@@ -126,11 +147,11 @@ app.post('/users', (req, res) => {
 })
 
 app.post('/users/login', (req, res) => {
-    console.log('logging in')
     uh.authenticateUser(databaseData, req, function(err, data){
 	if(err){
 	    res.status(401)
-	    res.end("error:" + err)
+	    res.json({"errMessage": err.message})
+	    res.end()
 	} else {
 	    var token = jwt.sign({"username": req.body["username"]}, config.secret, {
 		expiresIn: 86400
@@ -146,12 +167,14 @@ app.post('/messages', (req, res) => {
     jwt.verify(req.headers.authorization, config.secret, function(err, decoded) {
 	if (err){
 	    res.status(401)
-	    res.end("error:" + err)
+	    res.json({"errMessage": err.message})
+	    res.end()
 	} else {
 	    mh.createMessage(databaseData, req, function(err, data){
 		if(err){
 		    res.status(500)
-		    res.end("error:" + err)
+		    res.json({"errMessage": err.message})
+		    res.end()
 		} else {
 		    res.status(201)
 		    res.json({"sentMessage": true})
@@ -166,12 +189,14 @@ app.get('/messages', (req, res) => {
     jwt.verify(req.headers.authorization, config.secret, function(err, decoded){
 	if (err){
 	    res.status(401)
-	    res.end("error:" + err)
+	    res.json({"errMessage": err.message})
+	    res.end()
 	} else {
 	    mh.getMessages(databaseData, decoded.username, function(err, data){
 		if(err){
 		    res.status(500)
-		    res.end("error:" + err)
+		    res.json({"errMessage": err.message})
+		    res.end()
 		} else {
 		    res.status(200)
 		    res.json(data)
@@ -186,16 +211,17 @@ app.delete('/messages/:id', (req, res) => {
     jwt.verify(req.headers.authorization, config.secret, function(err, decoded){
 	if (err){
 	    res.status(401)
-	    res.end("error:" + err)
+	    res.json({"errMessage": err.message})
+	    res.end()
 	} else {
 	    mh.deleteMessage(databaseData, req.params.id, decoded.username, function(err, data){
 		if(err){
 		    res.status(500)
-		    console.log(err)
-		    res.end("error:" + err)
+		    res.json({"errMessage": err.message})
+		    res.end()
 		} else {
 		    res.status(200)
-		    res.json({"deleted": true})
+		    res.json({"deletedMessage": true})
 		    res.end()
 		}
 	    })
