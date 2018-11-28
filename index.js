@@ -1,3 +1,8 @@
+/*
+ * Module for running the API with its routes
+ * @module index
+ */
+
 /* eslint-disable no-undef */
 var express = require('express')
 var bodyParser = require('body-parser')
@@ -30,10 +35,22 @@ const databaseData = {
     database:"sql2264805"
 }
 
+
 app.use(cors())
 
+/** 
+ * Route for serving product image files
+ * @name Static File Service
+ * @route {GET} /products/images/:id.jpg
+ */
 app.use(express.static('public'))
 
+/**
+ * Route for serving a list of products
+ * @name List Products
+ * @route {GET} /products
+ * @queryparam {string} [title] - The title of the product being searched for
+ */
 app.get('/products', function (req, res) {
     ph.getAllProducts(databaseData, req, function(err, data){
         if(err){
@@ -48,6 +65,17 @@ app.get('/products', function (req, res) {
     })
 })
 
+/**
+ * Route for uploading a product
+ * @name Upload Product
+ * @route {POST} /products
+ * @authentication JWT - A username is required in the decoded JWT
+ * @bodyparam {string} title - The name of the product
+ * @bodyparam {string} location - The location of the product
+ * @bodyparam {string} description - The description of the product
+ * @bodyparam {string|float} price - The price of the product
+ * @bodyparam {file} product - The image of the product
+ */
 app.post('/products',upload.single('product'), function (req, res) {
     // upload a new product
     jwt.verify(req.headers.authorization, config.secret, function(err, decoded){
@@ -82,6 +110,13 @@ app.post('/products',upload.single('product'), function (req, res) {
     })
 })
 
+/**
+ * Route for deleting a product
+ * @name Delete Product
+ * @route {DELETE} /products/:id
+ * @authentication JWT - A username is required in the decoded JWT
+ * @routeparam {string} id - The id of the product to delete
+ */
 app.delete('/products/:id', function (req, res) {
     jwt.verify(req.headers.authorization, config.secret, function(err, decoded) {
         if (err){
@@ -104,6 +139,12 @@ app.delete('/products/:id', function (req, res) {
     })
 })
 
+/**
+ * Route for creating the database
+ * @name Create Database
+ * @route {GET} /createTables
+ * @authentication JWT - A username is required in the decoded JWT that contains the string "admin"
+ */
 app.get('/createTables', (req, res) => {
     jwt.verify(req.headers.authorization, config.secret, function(err, decoded) {
         if (err){
@@ -131,6 +172,14 @@ app.get('/createTables', (req, res) => {
     })
 })
 
+/**
+ * Route for creating a user
+ * @name Create User
+ * @route {POST} /users
+ * @bodyparam {string} username - The user to create
+ * @bodyparam {string} password - The password for the user
+ * @bodyparam {string} rePassword - The password verification string to compare with password
+ */
 app.post('/users', (req, res) => {
     uh.createUser(databaseData, req, function(err){
         if(err){
@@ -148,6 +197,13 @@ app.post('/users', (req, res) => {
     })
 })
 
+/**
+ * Route for logging in a user
+ * @name Login User
+ * @route {POST} /users/login
+ * @bodyparam {string} username - The user to create
+ * @bodyparam {string} password - The password for the user
+ */
 app.post('/users/login', (req, res) => {
     uh.authenticateUser(databaseData, req, function(err){
         if(err){
@@ -165,6 +221,15 @@ app.post('/users/login', (req, res) => {
     })
 })
 
+/**
+ * Route for uploading a message
+ * @name Upload Message
+ * @route {POST} /messages
+ * @authentication JWT - A username is required in the decoded JWT
+ * @bodyparam {string} toUser - The username of the message's recipient
+ * @bodyparam {string} subject - The subject of the message
+ * @bodyparam {string} content - The content of the message
+ */
 app.post('/messages', (req, res) => {
     jwt.verify(req.headers.authorization, config.secret, function(err, decoded) {
         if (err){
@@ -187,6 +252,12 @@ app.post('/messages', (req, res) => {
     })
 })
 
+/**
+ * Route for getting a user's messages
+ * @name Get Messages
+ * @route {GET} /messages
+ * @authentication JWT - A username is required in the decoded JWT
+ */
 app.get('/messages', (req, res) => {
     jwt.verify(req.headers.authorization, config.secret, function(err, decoded){
         if (err){
@@ -209,6 +280,13 @@ app.get('/messages', (req, res) => {
     })
 })
 
+/**
+ * Route for deleting a message
+ * @name Delete Message
+ * @route {DELETE} /messages/:id
+ * @authentication JWT - A username is required in the decoded JWT
+ * @routeparam {string} id - The id of the message to delete
+ */
 app.delete('/messages/:id', (req, res) => {
     jwt.verify(req.headers.authorization, config.secret, function(err, decoded){
         if (err){

@@ -21,6 +21,8 @@
         "mysql": "^2.16.0"
     },
     "devDependencies": {
-        "eslint": "^5.9.0"
+        "eslint": "^5.9.0",
+        "jsdoc": "^3.5.5",
+        "jsdoc-route-plugin": "^0.1.0"
     }
 }
