@@ -1,8 +1,34 @@
+/**
+ * a module for handling interactions related to core database functionality
+ * @module databaseHandler
+ */
+
 /* eslint-disable no-undef */
 var mysql = require('mysql')
 var bcrypt = require('bcrypt')
 /* eslint-enable no-undef */
 
+/**
+ * a callback that does not return data
+ * @callback emptyCallback
+ * @param {Error|null} err
+ */
+
+/**
+ * a callback that returns a connection to the database
+ * @callback connectionCallback
+ * @param {Error|null} err
+ */
+
+/**
+ * provides a connection to the database
+ * @param {Object} conData - The connection data for the database
+ * @param {string} conData.host - The name of the host we're connecting to
+ * @param {string} conData.user - The username of the administrator of the database
+ * @param {string} conData.password - The password of the administrator of the database
+ * @param {string} conData.database - The name of the database to connect to
+ * @param {connectionCallback} 
+ */
 /* eslint-disable-next-line no-undef */
 exports.connect = function(conData, callback){
     var con = mysql.createConnection({
@@ -19,6 +45,15 @@ exports.connect = function(conData, callback){
     })
 }
 
+/**
+ * initializes the database with the correct tables
+ * @param {Object} conData - The connection data for the database
+ * @param {string} conData.host - The name of the host we're connecting to
+ * @param {string} conData.user - The username of the administrator of the database
+ * @param {string} conData.password - The password of the administrator of the database
+ * @param {string} conData.database - The name of the database to connect to
+ * @param {emptyCallback} 
+ */
 /* eslint-disable-next-line no-undef */
 exports.createTables = function(conData, callback){
     var con = mysql.createConnection({

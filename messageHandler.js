@@ -1,7 +1,53 @@
+/**
+ * a module for handling interactions related to the Messages table of the
+ * database.
+ * @module messageHandler
+ */
+
 /* eslint-disable no-undef */
 var db = require('./databaseHandler')
 /* eslint-enable no-undef */
 
+/**
+ * a callback that does not return data
+ * @callback emptyCallback
+ * @param {Error|null} err
+ */
+
+/**
+ * a callback that returns the ID of the message affected
+ * @callback updateCallback
+ * @param {Error|null} err
+ * @param {string} ID
+ */
+
+/**
+ * a callback that returns message data
+ * @callback getCallback
+ * @param {Error|null} err
+ * @param {Object} JSONToReturn - The return object containing the data
+ * @param {Object[]} JSONToReturn.content - The list of message objects to return
+ * @param {integer} JSONToReturn.content.messageID - The ID of the product
+ * @param {string} JSONToReturn.content.toUser - The name of the user the message is intended for
+ * @param {string} JSONToReturn.content.fromUser - The name of the user who sent the message
+ * @param {string} JSONToReturn.content.subject - The subject of the message
+ * @param {string} JSONToReturn.content.content - The content of the message
+ */
+
+/**
+ * add a message to the Messages table
+ * @param {Object} conData - The connection data for the database
+ * @param {string} conData.host - The name of the host we're connecting to
+ * @param {string} conData.user - The username of the administrator of the database
+ * @param {string} conData.password - The password of the administrator of the database
+ * @param {string} conData.database - The name of the database to connect to
+ * @param {Object} req - The request object sent from ExpressJS
+ * @param {string} req.body.toUser - The username of the recipient of the message
+ * @param {string} req.body.subject - The subject of the message
+ * @param {string} req.body.content - The content of the message
+ * @param {string} fromUser - The username of the user sending the message
+ * @param {emptyCallback} 
+ */
 /* eslint-disable-next-line no-undef */
 exports.createMessage = function(conData, req, fromUser, callback){
     if(req.body['toUser'] === fromUser){
@@ -34,6 +80,16 @@ exports.createMessage = function(conData, req, fromUser, callback){
     })
 }
 
+/**
+ * get a user's received messages from the Messages table
+ * @param {Object} conData - The connection data for the database
+ * @param {string} conData.host - The name of the host we're connecting to
+ * @param {string} conData.user - The username of the administrator of the database
+ * @param {string} conData.password - The password of the administrator of the database
+ * @param {string} conData.database - The name of the database to connect to
+ * @param {string} username - The username of the user whose messages we're obtaining
+ * @param {getCallback} 
+ */
 /* eslint-disable-next-line no-undef */
 exports.getMessages = function(conData, username, callback){
     db.connect(conData, function(err, conn){
@@ -66,6 +122,17 @@ exports.getMessages = function(conData, username, callback){
     })
 }
 
+/**
+ * delete a message from the Messages table
+ * @param {Object} conData - The connection data for the database
+ * @param {string} conData.host - The name of the host we're connecting to
+ * @param {string} conData.user - The username of the administrator of the database
+ * @param {string} conData.password - The password of the administrator of the database
+ * @param {string} conData.database - The name of the database to connect to
+ * @param {string} username - The username of the user whose message we're deleting
+ * @param {string} id - The ID of the message we're deleting
+ * @param {updateCallback} 
+ */
 /* eslint-disable-next-line no-undef */
 exports.deleteMessage = function(conData, id, username, callback){
     db.connect(conData, function(err, conn){
@@ -80,7 +147,7 @@ exports.deleteMessage = function(conData, id, username, callback){
                     callback(err)
                 } else {
                     conn.end()
-                    callback(err)
+                    callback(err, id)
                 }
             })
         }

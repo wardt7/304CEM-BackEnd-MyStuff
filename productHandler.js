@@ -1,9 +1,62 @@
+/**
+ * a module for handling interactions related to the Product table of the
+ * database.
+ * @module productHandler
+ */
+
 /* eslint-disable no-undef */
 var db = require("./databaseHandler")
 var fs = require("fs")
 var crypto = require("crypto")
 /* eslint-enable no-undef */
 
+/**
+ * a callback that does not return data
+ * @callback emptyCallback
+ * @param {Error|null} err
+ */
+
+/**
+ * a callback that returns the ID of the product affected
+ * @callback updateCallback
+ * @param {Error|null} err
+ * @param {string} ID
+ */
+
+/**
+ * a callback that returns product data
+ * @callback getCallback
+ * @param {Error|null} err
+ * @param {Object} JSONToReturn - The return object containing the data
+ * @param {Object[]} JSONToReturn.content - The list of product objects to return
+ * @param {string} JSONToReturn.content.productID - The ID of the product
+ * @param {string} JSONToReturn.content.title - The name of the product
+ * @param {string} JSONToReturn.content.author - The author of the product
+ * @param {string} JSONToReturn.content.location - The location of the product
+ * @param {string} JSONToReturn.content.description - The description of the product
+ * @param {string} JSONToReturn.content.price - The price of the product
+ * @param {Object[]} JSONToReturn.content.links - A list of links that the recipient can access
+ * @param {string} JSONToReturn.content.links.rel - The relation of the link to the product (always self)
+ * @param {string} JSONToReturn.content.links.href - The image of the product if available
+ */
+
+
+
+/**
+ * create a new product in the Product table
+ * @param {Object} conData - The connection data for the database
+ * @param {string} conData.host - The name of the host we're connecting to
+ * @param {string} conData.user - The username of the administrator of the database
+ * @param {string} conData.password - The password of the administrator of the database
+ * @param {string} conData.database - The name of the database to connect to
+ * @param {Object} req - The request object sent from ExpressJS
+ * @param {string} req.body.title - The title of the new product
+ * @param {string} req.body.description - The description of the new product
+ * @param {string} req.body.location - The location of the new product
+ * @param {string|float} req.body.price - The price of the new product. Must be parseable to float
+ * @param {string} username - The username of the user adding the product
+ * @param {updateCallback} 
+ */
 /* eslint-disable-next-line no-undef */
 exports.addProduct = function(conData, req, username, callback){
     db.connect(conData, function(err, data){
@@ -35,6 +88,18 @@ exports.addProduct = function(conData, req, username, callback){
     })
 }
 
+/**
+ * add an image to a product in the Product table
+ * @param {Object} conData - The connection data for the database
+ * @param {string} conData.host - The name of the host we're connecting to
+ * @param {string} conData.user - The username of the administrator of the database
+ * @param {string} conData.password - The password of the administrator of the database
+ * @param {string} conData.database - The name of the database to connect to
+ * @param {Object} fileData - The image data information object sent from ExpressJS
+ * @param {string} fileData.ID - The ID of the product being updated
+ * @param {string} fileData.currentUrl - The current internal URL (path) of the image
+ * @param {updateCallback} 
+ */
 /* eslint-disable-next-line no-undef */
 exports.addImage = function(conData, fileData, callback){
     var newUrl = `public/products/images/${fileData.ID}.jpg`
@@ -57,7 +122,7 @@ exports.addImage = function(conData, fileData, callback){
                         return
                     } else {
                         data.end()
-                        callback(null)
+                        callback(null, fileData.ID)
                     }
                 })
             })
@@ -65,6 +130,17 @@ exports.addImage = function(conData, fileData, callback){
     })
 }
 
+/**
+ * get products from the Product table
+ * @param {Object} conData - The connection data for the database
+ * @param {string} conData.host - The name of the host we're connecting to
+ * @param {string} conData.user - The username of the administrator of the database
+ * @param {string} conData.password - The password of the administrator of the database
+ * @param {string} conData.database - The name of the database to connect to
+ * @param {Object} req - The request object sent from ExpressJS
+ * @param {string} [req.query.title] - The title of product to be searched for
+ * @param {getCallback} 
+ */
 /* eslint-disable-next-line no-undef */
 exports.getAllProducts = function(conData, req, callback){
     db.connect(conData, function(err, conn){
@@ -104,6 +180,17 @@ exports.getAllProducts = function(conData, req, callback){
     })
 }
 
+/**
+ * deletes a product in the Product table
+ * @param {Object} conData - The connection data for the database
+ * @param {string} conData.host - The name of the host we're connecting to
+ * @param {string} conData.user - The username of the administrator of the database
+ * @param {string} conData.password - The password of the administrator of the database
+ * @param {string} conData.database - The name of the database to connect to
+ * @param {string} id - The ID of the product to be deleted
+ * @param {string} username - The author of the product to be deleted
+ * @param {updateCallback} 
+ */
 /* eslint-disable-next-line no-undef */
 exports.deleteProduct = function(conData, id, username, callback){
     db.connect(conData, function(err, conn){
@@ -125,7 +212,7 @@ exports.deleteProduct = function(conData, id, username, callback){
                      * we don't care about the error from fs.unlink, it's
                      *just a cleanup function. 
                      */
-                    callback(null)
+                    callback(null, id)
                 })
             }
         })
