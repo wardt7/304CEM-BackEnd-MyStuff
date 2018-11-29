@@ -4,7 +4,7 @@
     "description": "The back end API for the MyStuff website",
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "jest"
     },
     "author": "Toby Ward",
     "license": "ISC",
@@ -22,6 +22,7 @@
     },
     "devDependencies": {
         "eslint": "^5.9.0",
+        "jest": "^23.6.0",
         "jsdoc": "^3.5.5",
         "jsdoc-route-plugin": "^0.1.0"
     }
