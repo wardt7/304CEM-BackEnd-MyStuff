@@ -141,12 +141,14 @@ exports.deleteMessage = function(conData, id, username, callback){
             return
         } else {
             var sql = "DELETE FROM Messages WHERE messageID = ? AND toUser = ?"
-            conn.query(sql, [Number(id), username], function(err){
+            conn.query(sql, [Number(id), username], function(err, result){
+		conn.end()
                 if (err){
-                    conn.end()
                     callback(err)
-                } else {
-                    conn.end()
+                } else if (result.affectedRows === 0){
+		    var emptyErr = new Error("Didn't delete anything, is messageID and toUser correct?")
+		    callback(emptyErr)
+		} else {
                     callback(err, id)
                 }
             })

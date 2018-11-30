@@ -62,15 +62,14 @@ exports.createTables = function(conData, callback){
         password: conData.password,
         database: conData.database
     })
-
-    var sql = "CREATE TABLE Users (username VARCHAR(255) NOT NULL, password CHAR(60) NOT NULL, email VARCHAR(128) NOT NULL, PRIMARY KEY (username))"
+    var sql = "CREATE TABLE IF NOT EXISTS Users (username VARCHAR(255) NOT NULL, password CHAR(60) NOT NULL, email VARCHAR(128) NOT NULL, PRIMARY KEY (username))"
     con.query(sql, function(err) {
         if (err) {
             con.end()
             callback(err)
             return
         } else {
-            sql = "CREATE TABLE Products (productID VARCHAR(32) NOT NULL, title VARCHAR(255) NOT NULL, img VARCHAR(255), location VARCHAR(127) NOT NULL, price FLOAT(8,2) NOT NULL," +
+            sql = "CREATE TABLE IF NOT EXISTS Products (productID VARCHAR(32) NOT NULL, title VARCHAR(255) NOT NULL, img VARCHAR(255), location VARCHAR(127) NOT NULL, price FLOAT(8,2) NOT NULL," +
                 " description VARCHAR(4096), author VARCHAR(255) NOT NULL, PRIMARY KEY (productID), CONSTRAINT FK_ProductAuthor FOREIGN KEY (author) REFERENCES Users(username));"
             con.query(sql, function(err) {
                 if (err) {
@@ -78,7 +77,7 @@ exports.createTables = function(conData, callback){
                     callback(err)
                     return
                 } else {
-                    sql = "CREATE TABLE Messages (messageID INTEGER NOT NULL AUTO_INCREMENT, toUser VARCHAR(255) NOT NULL, fromUser VARCHAR(255) NOT NULL, subject VARCHAR(255) NOT NULL," +
+                    sql = "CREATE TABLE IF NOT EXISTS Messages (messageID INTEGER NOT NULL AUTO_INCREMENT, toUser VARCHAR(255) NOT NULL, fromUser VARCHAR(255) NOT NULL, subject VARCHAR(255) NOT NULL," +
                         " content VARCHAR(8192), PRIMARY KEY (messageID), CONSTRAINT FK_MessageTo FOREIGN KEY (toUser) REFERENCES Users(username)," +
                         " CONSTRAINT FK_MessageFrom FOREIGN KEY (fromUser) REFERENCES Users(username));"
                     con.query(sql, function(err) {
@@ -118,3 +117,65 @@ exports.createTables = function(conData, callback){
         }
     })
 }
+
+/**
+ * deletes the tables in the database (used for cleanup after JEST tests)
+ * @param {Object} conData - The connection data for the database
+ * @param {string} conData.host - The name of the host we're connecting to
+ * @param {string} conData.user - The username of the administrator of the database
+ * @param {string} conData.password - The password of the administrator of the database
+ * @param {string} conData.database - The name of the database to connect to
+ * @param {emptyCallback} 
+ */
+/* eslint-disable-next-line no-undef */
+exports.deleteTables = function(conData, callback){
+    var con = mysql.createConnection({
+        host: conData.host,
+        user: conData.user,
+        password: conData.password,
+        database: conData.database
+    })
+    con.query("SET FOREIGN_KEY_CHECKS = 0", function(err){
+	if(err) {
+	    con.end()
+	    callback(err)
+	    return
+	} else {
+	    con.query("DROP TABLE IF EXISTS Users", function(err){
+		if(err) {
+		    con.end()
+		    callback(err)
+		    return
+		} else {
+		    con.query("DROP TABLE IF EXISTS Products", function(err){
+			if(err) {
+			    con.end()
+			    callback(err)
+			    return
+			} else {
+			    con.query("DROP TABLE IF EXISTS Messages", function(err){
+				if(err) {
+				    con.end()
+				    callback(err)
+				    return
+				} else {
+				    con.query("SET FOREIGN_KEY_CHECKS = 1", function(err){
+					con.end()
+					if(err) {
+					    callback(err)
+					    return
+					} else {
+					    callback(null)
+					    return
+					}
+				    })
+				}
+			    })
+			}
+		    })
+		}
+	    })
+	}
+    })
+}
+	    

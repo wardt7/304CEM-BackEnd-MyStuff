@@ -61,7 +61,6 @@ var crypto = require("crypto")
 exports.addProduct = function(conData, req, username, callback){
     db.connect(conData, function(err, data){
         if (err) {
-            data.end()
             callback(err)
             return
         }
@@ -199,13 +198,16 @@ exports.deleteProduct = function(conData, id, username, callback){
             return
         }
         var sql = "DELETE FROM Products WHERE productID = ? AND author = ?"
-        conn.query(sql, [id, username], function(err){
+        conn.query(sql, [id, username], function(err, result){
+	    conn.end()
             if (err) {
-                conn.end()
                 callback(err)
                 return
-            } else {
-                conn.end()
+            } else if (result.affectedRows === 0){
+		var emptyErr = new Error("Didn't delete anything, is productID and author correct?")
+		callback(emptyErr)
+		return
+	    } else {
                 fs.unlink(`public/products/images/${id}.jpg`, function(){
 
                     /*
