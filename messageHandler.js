@@ -129,19 +129,27 @@ exports.getMessages = function(conData, username, callback){
  * @param {string} conData.user - The username of the administrator of the database
  * @param {string} conData.password - The password of the administrator of the database
  * @param {string} conData.database - The name of the database to connect to
- * @param {string} username - The username of the user whose message we're deleting
+ * @param {Object} decoded - The decoded JWT token
+ * @param {string} decoded.username - The username of the user whose message we're deleting
+ * @param {boolean|undefined} decoded.isAdmin - Whether or not the user is an admin
  * @param {string} id - The ID of the message we're deleting
  * @param {updateCallback} 
  */
 /* eslint-disable-next-line no-undef */
-exports.deleteMessage = function(conData, id, username, callback){
+exports.deleteMessage = function(conData, id, decoded, callback){
     db.connect(conData, function(err, conn){
         if (err) {
             callback(err)
             return
         } else {
-            var sql = "DELETE FROM Messages WHERE messageID = ? AND toUser = ?"
-            conn.query(sql, [Number(id), username], function(err, result){
+            var sql = ""
+            // bypass the toUser check in the SQL if the user is an admin
+            if(decoded.hasOwnProperty("isAdmin")){
+                sql = "DELETE FROM Messages WHERE messageID = ?"
+            } else {
+                sql = "DELETE FROM Messages WHERE messageID = ? AND toUser = ?"
+            }
+            conn.query(sql, [Number(id), decoded.username], function(err, result){
                 conn.end()
                 if (err){
                     callback(err)

@@ -187,18 +187,26 @@ exports.getAllProducts = function(conData, req, callback){
  * @param {string} conData.password - The password of the administrator of the database
  * @param {string} conData.database - The name of the database to connect to
  * @param {string} id - The ID of the product to be deleted
- * @param {string} username - The author of the product to be deleted
+ * @param {Object} decoded - The decoded data from a JWT
+ * @param {string} decoded.username - The username of the product author
+ * @param {bool|undefined} decoded.isAdmin - Whether or not the user is an admin. Is admin if present
  * @param {updateCallback} 
  */
 /* eslint-disable-next-line no-undef */
-exports.deleteProduct = function(conData, id, username, callback){
+exports.deleteProduct = function(conData, id, decoded, callback){
     db.connect(conData, function(err, conn){
         if (err) {
             callback(err)
             return
         }
-        var sql = "DELETE FROM Products WHERE productID = ? AND author = ?"
-        conn.query(sql, [id, username], function(err, result){
+        var sql = ""
+        // admins can delete any product
+        if(decoded.hasOwnProperty("isAdmin")){
+            sql = "DELETE FROM Products WHERE productID = ?"
+        } else {
+            sql = "DELETE FROM Products WHERE productID = ? AND author = ?"
+        }
+        conn.query(sql, [id, decoded.username], function(err, result){
             conn.end()
             if (err) {
                 callback(err)
@@ -212,7 +220,7 @@ exports.deleteProduct = function(conData, id, username, callback){
 
                     /*
                      * we don't care about the error from fs.unlink, it's
-                     *just a cleanup function. 
+                     * just a cleanup function. 
                      */
                     callback(null, id)
                 })

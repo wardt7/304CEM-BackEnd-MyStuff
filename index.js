@@ -114,7 +114,7 @@ app.post("/products",upload.single("product"), function (req, res) {
  * route for deleting a product
  * @name Delete Product
  * @route {DELETE} /products/:id
- * @authentication JWT - A username is required in the decoded JWT
+ * @authentication JWT - A username is required in the decoded JWT. isAdmin can be optionally included.
  * @routeparam {string} id - The id of the product to delete
  */
 app.delete("/products/:id", function (req, res) {
@@ -124,7 +124,7 @@ app.delete("/products/:id", function (req, res) {
             res.json({"errMessage": err.message})
             res.end()
         } else {
-            ph.deleteProduct(databaseData, req.params.id, decoded.username, function(err) {
+            ph.deleteProduct(databaseData, req.params.id, decoded, function(err) {
                 if (err){
                     res.status(500)
                     res.json({"errMessage": err.message})
@@ -143,7 +143,7 @@ app.delete("/products/:id", function (req, res) {
  * route for creating the database
  * @name Create Database
  * @route {GET} /createTables
- * @authentication JWT - A username is required in the decoded JWT that contains the string "admin"
+ * @authentication JWT - Username and isAdmin are required in the decoded JWT
  */
 app.get("/createTables", (req, res) => {
     jwt.verify(req.headers.authorization, config.secret, function(err, decoded) {
@@ -151,7 +151,7 @@ app.get("/createTables", (req, res) => {
             res.status(401)
             res.json({"errMessage": err.message})
             res.end()
-        } else if (decoded.username !== "admin") {
+        } else if (!decoded.hasOwnProperty("isAdmin")) {
             res.status(401)
             res.json({"errMessage": "You're not an admin!"})
             res.end()
@@ -251,6 +251,7 @@ app.post("/messages", (req, res) => {
  * @name Get Messages
  * @route {GET} /messages
  * @authentication JWT - A username is required in the decoded JWT
+ * @queryparam toUser - The user receiving the message. Only applicable if JWT contains isAdmin
  */
 app.get("/messages", (req, res) => {
     jwt.verify(req.headers.authorization, config.secret, function(err, decoded){
@@ -259,7 +260,14 @@ app.get("/messages", (req, res) => {
             res.json({"errMessage": err.message})
             res.end()
         } else {
-            mh.getMessages(databaseData, decoded.username, function(err, data){
+            var toUser = ""
+            if(decoded.hasOwnProperty("isAdmin")){
+		/* eslint-disable-next-line prefer-destructuring */
+                toUser = req.query.toUser
+            } else {
+                toUser = decoded.username
+            }
+            mh.getMessages(databaseData, toUser, function(err, data){
                 if(err){
                     res.status(500)
                     res.json({"errMessage": err.message})
@@ -288,7 +296,7 @@ app.delete("/messages/:id", (req, res) => {
             res.json({"errMessage": err.message})
             res.end()
         } else {
-            mh.deleteMessage(databaseData, req.params.id, decoded.username, function(err){
+            mh.deleteMessage(databaseData, req.params.id, decoded, function(err){
                 if(err){
                     res.status(500)
                     res.json({"errMessage": err.message})
