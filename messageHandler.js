@@ -5,7 +5,7 @@
  */
 
 /* eslint-disable no-undef */
-var db = require('./databaseHandler')
+var db = require("./databaseHandler")
 /* eslint-enable no-undef */
 
 /**
@@ -50,8 +50,8 @@ var db = require('./databaseHandler')
  */
 /* eslint-disable-next-line no-undef */
 exports.createMessage = function(conData, req, fromUser, callback){
-    if(req.body['toUser'] === fromUser){
-        var matchErr = new Error('toUser and fromUser cannot match!')
+    if(req.body["toUser"] === fromUser){
+        var matchErr = new Error("toUser and fromUser cannot match!")
         callback(matchErr)
         return
     }
@@ -62,10 +62,10 @@ exports.createMessage = function(conData, req, fromUser, callback){
         } else {
             var sql = "INSERT INTO Messages SET ?"
             var msg = {
-                toUser: req.body['toUser'],
+                toUser: req.body["toUser"],
                 fromUser: fromUser,
-                subject: req.body['subject'],
-                content: req.body['content']
+                subject: req.body["subject"],
+                content: req.body["content"]
             }
             conn.query(sql, msg, function(err){
                 if (err) {
@@ -142,13 +142,13 @@ exports.deleteMessage = function(conData, id, username, callback){
         } else {
             var sql = "DELETE FROM Messages WHERE messageID = ? AND toUser = ?"
             conn.query(sql, [Number(id), username], function(err, result){
-		conn.end()
+                conn.end()
                 if (err){
                     callback(err)
                 } else if (result.affectedRows === 0){
-		    var emptyErr = new Error("Didn't delete anything, is messageID and toUser correct?")
-		    callback(emptyErr)
-		} else {
+                    var emptyErr = new Error("Didn't delete anything, is messageID and toUser correct?")
+                    callback(emptyErr)
+                } else {
                     callback(err, id)
                 }
             })

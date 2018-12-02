@@ -1,21 +1,21 @@
 /*
- * Module for running the API with its routes
+ * module for running the API with its routes
  * @module index
  */
 
 /* eslint-disable no-undef */
-var express = require('express')
-var bodyParser = require('body-parser')
-var multer = require('multer')
-var jwt = require('jsonwebtoken')
-var config = require('./config')
-var es6Renderer = require('express-es6-template-engine')
-var db = require('./databaseHandler')
-var ph = require('./productHandler')
-var uh = require('./userHandler')
-var mh = require('./messageHandler')
-var cors = require('cors')
-var upload = multer({ dest: 'public/products/images' });
+var express = require("express")
+var bodyParser = require("body-parser")
+var multer = require("multer")
+var jwt = require("jsonwebtoken")
+var config = require("./config")
+var es6Renderer = require("express-es6-template-engine")
+var db = require("./databaseHandler")
+var ph = require("./productHandler")
+var uh = require("./userHandler")
+var mh = require("./messageHandler")
+var cors = require("cors")
+var upload = multer({ dest: "public/products/images" });
 var app = express();
 /* eslint-enable no-undef */
 
@@ -23,9 +23,9 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({extended: true}))
 
 
-app.engine('html', es6Renderer)
-app.set('views', 'html')
-app.set('view engine', 'html')
+app.engine("html", es6Renderer)
+app.set("views", "html")
+app.set("view engine", "html")
 
 var port = 8080
 const databaseData = {
@@ -39,19 +39,19 @@ const databaseData = {
 app.use(cors())
 
 /** 
- * Route for serving product image files
+ * route for serving product image files
  * @name Static File Service
  * @route {GET} /products/images/:id.jpg
  */
-app.use(express.static('public'))
+app.use(express.static("public"))
 
 /**
- * Route for serving a list of products
+ * route for serving a list of products
  * @name List Products
  * @route {GET} /products
  * @queryparam {string} [title] - The title of the product being searched for
  */
-app.get('/products', function (req, res) {
+app.get("/products", function (req, res) {
     ph.getAllProducts(databaseData, req, function(err, data){
         if(err){
             res.status(500)
@@ -66,7 +66,7 @@ app.get('/products', function (req, res) {
 })
 
 /**
- * Route for uploading a product
+ * route for uploading a product
  * @name Upload Product
  * @route {POST} /products
  * @authentication JWT - A username is required in the decoded JWT
@@ -76,7 +76,7 @@ app.get('/products', function (req, res) {
  * @bodyparam {string|float} price - The price of the product
  * @bodyparam {file} product - The image of the product
  */
-app.post('/products',upload.single('product'), function (req, res) {
+app.post("/products",upload.single("product"), function (req, res) {
     // upload a new product
     jwt.verify(req.headers.authorization, config.secret, function(err, decoded){
         if(err){
@@ -111,13 +111,13 @@ app.post('/products',upload.single('product'), function (req, res) {
 })
 
 /**
- * Route for deleting a product
+ * route for deleting a product
  * @name Delete Product
  * @route {DELETE} /products/:id
  * @authentication JWT - A username is required in the decoded JWT
  * @routeparam {string} id - The id of the product to delete
  */
-app.delete('/products/:id', function (req, res) {
+app.delete("/products/:id", function (req, res) {
     jwt.verify(req.headers.authorization, config.secret, function(err, decoded) {
         if (err){
             res.status(401)
@@ -140,12 +140,12 @@ app.delete('/products/:id', function (req, res) {
 })
 
 /**
- * Route for creating the database
+ * route for creating the database
  * @name Create Database
  * @route {GET} /createTables
  * @authentication JWT - A username is required in the decoded JWT that contains the string "admin"
  */
-app.get('/createTables', (req, res) => {
+app.get("/createTables", (req, res) => {
     jwt.verify(req.headers.authorization, config.secret, function(err, decoded) {
         if (err){
             res.status(401)
@@ -173,14 +173,14 @@ app.get('/createTables', (req, res) => {
 })
 
 /**
- * Route for creating a user
+ * route for creating a user
  * @name Create User
  * @route {POST} /users
  * @bodyparam {string} username - The user to create
  * @bodyparam {string} password - The password for the user
  * @bodyparam {string} rePassword - The password verification string to compare with password
  */
-app.post('/users', (req, res) => {
+app.post("/users", (req, res) => {
     uh.createUser(databaseData, req, function(err, token){
         if(err){
             res.status(500)
@@ -195,13 +195,13 @@ app.post('/users', (req, res) => {
 })
 
 /**
- * Route for logging in a user
+ * route for logging in a user
  * @name Login User
  * @route {POST} /users/login
  * @bodyparam {string} username - The user to create
  * @bodyparam {string} password - The password for the user
  */
-app.post('/users/login', (req, res) => {
+app.post("/users/login", (req, res) => {
     uh.authenticateUser(databaseData, req, function(err, token){
         if(err){
             res.status(401)
@@ -216,7 +216,7 @@ app.post('/users/login', (req, res) => {
 })
 
 /**
- * Route for uploading a message
+ * route for uploading a message
  * @name Upload Message
  * @route {POST} /messages
  * @authentication JWT - A username is required in the decoded JWT
@@ -224,7 +224,7 @@ app.post('/users/login', (req, res) => {
  * @bodyparam {string} subject - The subject of the message
  * @bodyparam {string} content - The content of the message
  */
-app.post('/messages', (req, res) => {
+app.post("/messages", (req, res) => {
     jwt.verify(req.headers.authorization, config.secret, function(err, decoded) {
         if (err){
             res.status(401)
@@ -247,12 +247,12 @@ app.post('/messages', (req, res) => {
 })
 
 /**
- * Route for getting a user's messages
+ * route for getting a user's messages
  * @name Get Messages
  * @route {GET} /messages
  * @authentication JWT - A username is required in the decoded JWT
  */
-app.get('/messages', (req, res) => {
+app.get("/messages", (req, res) => {
     jwt.verify(req.headers.authorization, config.secret, function(err, decoded){
         if (err){
             res.status(401)
@@ -275,13 +275,13 @@ app.get('/messages', (req, res) => {
 })
 
 /**
- * Route for deleting a message
+ * route for deleting a message
  * @name Delete Message
  * @route {DELETE} /messages/:id
  * @authentication JWT - A username is required in the decoded JWT
  * @routeparam {string} id - The id of the message to delete
  */
-app.delete('/messages/:id', (req, res) => {
+app.delete("/messages/:id", (req, res) => {
     jwt.verify(req.headers.authorization, config.secret, function(err, decoded){
         if (err){
             res.status(401)
@@ -309,7 +309,7 @@ app.listen(port, err => {
     if (err) {
         console.error(err)
     } else {
-        console.log('App is listening')
+        console.log("App is listening")
     }
 })
         

@@ -5,10 +5,10 @@
  */
 
 /* eslint-disable no-undef */
-var db = require('./databaseHandler')
-var bcrypt = require('bcrypt')
-var jwt = require('jsonwebtoken')
-var config = require('./config')
+var db = require("./databaseHandler")
+var bcrypt = require("bcrypt")
+var jwt = require("jsonwebtoken")
+var config = require("./config")
 /* eslint-enable no-undef */
 
 /**
@@ -33,7 +33,7 @@ var config = require('./config')
  */
 /* eslint-disable-next-line no-undef */
 exports.createUser = function(conData, req, callback){
-    if(req.body['password'] !== req.body['rePassword']){
+    if(req.body["password"] !== req.body["rePassword"]){
         var pwErr = new Error("Password and Verification Password do not match!")
         callback(pwErr)
         return
@@ -43,26 +43,26 @@ exports.createUser = function(conData, req, callback){
             callback(err)
             return
         }
-        bcrypt.hash(req.body['password'], 10, function(err, hash){
+        bcrypt.hash(req.body["password"], 10, function(err, hash){
             if (err) {
                 callback(err)
                 return
             } else {
                 var values = {
-                    username: req.body['username'],
-                    email: req.body['email'],
+                    username: req.body["username"],
+                    email: req.body["email"],
                     password: hash,
                 }
                 var sql = "INSERT INTO Users SET ?"
                 conn.query(sql, values, function(err){
-		    conn.end()
+                    conn.end()
                     if(err){
                         callback(err)
                         return
                     } else {
-			var token = jwt.sign({"username":req.body["username"]}, config.secret, {
-			    expiresIn: 86400
-			})
+                        var token = jwt.sign({"username":req.body["username"]}, config.secret, {
+                            expiresIn: 86400
+                        })
                         callback(null, token)
                         return
                     }
@@ -91,7 +91,7 @@ exports.authenticateUser = function(conData, req, callback){
             callback(err)
         } else {
             var sql = "SELECT username, password, isAdmin FROM Users WHERE username = ?"
-            var data = req.body['username']
+            var data = req.body["username"]
             conn.query(sql, data, function(err, result){
                 if(err){
                     conn.end()
@@ -100,26 +100,27 @@ exports.authenticateUser = function(conData, req, callback){
                 } else {
                     conn.end()
                     if(result.length !== 1){
-                        var authErr = new Error('Username and Password combination not found!')
+                        var authErr = new Error("Username and Password combination not found!")
                         callback(authErr)
                         return
                     } else {
-                        bcrypt.compare(req.body['password'], result[0].password, function(err, res){
+                        bcrypt.compare(req.body["password"], result[0].password, function(err, res){
                             if (err || res === false){
-                                var authErr = new Error('Username and Password combination not found!')
+                                var authErr = new Error("Username and Password combination not found!")
                                 callback(authErr)
                                 return
                             } else {
-				if(result[0].isAdmin === null){
-				    var token = jwt.sign({"username": req.body["username"]}, config.secret, {
-					expiresIn: 86400
-				    })
-				} else {
-				    var token = jwt.sign({"username": req.body["username"], "isAdmin": true}, config.secret, {
-					expiresIn: 86400
-				    })
-				}
-				callback(null, token)
+				var token = null
+                                if(result[0].isAdmin === null){
+                                    token = jwt.sign({"username": req.body["username"]}, config.secret, {
+                                        expiresIn: 86400
+                                    })
+                                } else {
+                                    token = jwt.sign({"username": req.body["username"], "isAdmin": true}, config.secret, {
+                                        expiresIn: 86400
+                                    })
+                                }
+                                callback(null, token)
                                 return
                             }
                         })

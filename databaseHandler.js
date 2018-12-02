@@ -4,8 +4,8 @@
  */
 
 /* eslint-disable no-undef */
-var mysql = require('mysql')
-var bcrypt = require('bcrypt')
+var mysql = require("mysql")
+var bcrypt = require("bcrypt")
 /* eslint-enable no-undef */
 
 /**
@@ -86,7 +86,7 @@ exports.createTables = function(conData, callback){
                             callback(err)
                             return
                         } else {
-                            bcrypt.hash('password', 10, function(err, hash){
+                            bcrypt.hash("password", 10, function(err, hash){
                                 if (err) {
                                     con.end()
                                     callback(err)
@@ -96,7 +96,7 @@ exports.createTables = function(conData, callback){
                                         username: "admin",
                                         password: hash,
                                         email: "admin@gmail.com",
-					isAdmin: 1
+                                        isAdmin: 1
                                     }
                                     sql = "INSERT INTO Users SET ?;"
                                     con.query(sql, data, function(err) {
@@ -137,46 +137,46 @@ exports.deleteTables = function(conData, callback){
         database: conData.database
     })
     con.query("SET FOREIGN_KEY_CHECKS = 0", function(err){
-	if(err) {
-	    con.end()
-	    callback(err)
-	    return
-	} else {
-	    con.query("DROP TABLE IF EXISTS Users", function(err){
-		if(err) {
-		    con.end()
-		    callback(err)
-		    return
-		} else {
-		    con.query("DROP TABLE IF EXISTS Products", function(err){
-			if(err) {
-			    con.end()
-			    callback(err)
-			    return
-			} else {
-			    con.query("DROP TABLE IF EXISTS Messages", function(err){
-				if(err) {
-				    con.end()
-				    callback(err)
-				    return
-				} else {
-				    con.query("SET FOREIGN_KEY_CHECKS = 1", function(err){
-					con.end()
-					if(err) {
-					    callback(err)
-					    return
-					} else {
-					    callback(null)
-					    return
-					}
-				    })
-				}
-			    })
-			}
-		    })
-		}
-	    })
-	}
+        if(err) {
+            con.end()
+            callback(err)
+            return
+        } else {
+            con.query("DROP TABLE IF EXISTS Users", function(err){
+                if(err) {
+                    con.end()
+                    callback(err)
+                    return
+                } else {
+                    con.query("DROP TABLE IF EXISTS Products", function(err){
+                        if(err) {
+                            con.end()
+                            callback(err)
+                            return
+                        } else {
+                            con.query("DROP TABLE IF EXISTS Messages", function(err){
+                                if(err) {
+                                    con.end()
+                                    callback(err)
+                                    return
+                                } else {
+                                    con.query("SET FOREIGN_KEY_CHECKS = 1", function(err){
+                                        con.end()
+                                        if(err) {
+                                            callback(err)
+                                            return
+                                        } else {
+                                            callback(null)
+                                            return
+                                        }
+                                    })
+                                }
+                            })
+                        }
+                    })
+                }
+            })
+        }
     })
 }
-	    
+            

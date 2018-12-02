@@ -64,17 +64,17 @@ exports.addProduct = function(conData, req, username, callback){
             callback(err)
             return
         }
-        var ID = crypto.randomBytes(16).toString('hex')
+        var ID = crypto.randomBytes(16).toString("hex")
         var product = {
             productID: ID,
-            title: req.body['title'],
-            description: req.body['description'],
+            title: req.body["title"],
+            description: req.body["description"],
             img: null,
-            location: req.body['location'],
-            price: parseFloat(req.body['price']),
+            location: req.body["location"],
+            price: parseFloat(req.body["price"]),
             author: username,
         }
-        data.query('INSERT INTO Products SET ?', product, function(err){
+        data.query("INSERT INTO Products SET ?", product, function(err){
             if (err) {
                 data.end()
                 callback(err)
@@ -199,15 +199,15 @@ exports.deleteProduct = function(conData, id, username, callback){
         }
         var sql = "DELETE FROM Products WHERE productID = ? AND author = ?"
         conn.query(sql, [id, username], function(err, result){
-	    conn.end()
+            conn.end()
             if (err) {
                 callback(err)
                 return
             } else if (result.affectedRows === 0){
-		var emptyErr = new Error("Didn't delete anything, is productID and author correct?")
-		callback(emptyErr)
-		return
-	    } else {
+                var emptyErr = new Error("Didn't delete anything, is productID and author correct?")
+                callback(emptyErr)
+                return
+            } else {
                 fs.unlink(`public/products/images/${id}.jpg`, function(){
 
                     /*
