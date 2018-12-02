@@ -62,7 +62,7 @@ exports.createTables = function(conData, callback){
         password: conData.password,
         database: conData.database
     })
-    var sql = "CREATE TABLE IF NOT EXISTS Users (username VARCHAR(255) NOT NULL, password CHAR(60) NOT NULL, email VARCHAR(128) NOT NULL, PRIMARY KEY (username))"
+    var sql = "CREATE TABLE IF NOT EXISTS Users (username VARCHAR(255) NOT NULL, password CHAR(60) NOT NULL, email VARCHAR(128) NOT NULL, isAdmin BIT(1), PRIMARY KEY (username))"
     con.query(sql, function(err) {
         if (err) {
             con.end()
@@ -95,7 +95,8 @@ exports.createTables = function(conData, callback){
                                     var data = {
                                         username: "admin",
                                         password: hash,
-                                        email: "admin@gmail.com"
+                                        email: "admin@gmail.com",
+					isAdmin: 1
                                     }
                                     sql = "INSERT INTO Users SET ?;"
                                     con.query(sql, data, function(err) {

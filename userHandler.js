@@ -7,12 +7,15 @@
 /* eslint-disable no-undef */
 var db = require('./databaseHandler')
 var bcrypt = require('bcrypt')
+var jwt = require('jsonwebtoken')
+var config = require('./config')
 /* eslint-enable no-undef */
 
 /**
- * a callback that does not return data
- * @callback emptyCallback
+ * a callback that returns a JSON Web Token
+ * @callback tokenCallback
  * @param {Error|null} err
+ * @param {string|null} jwt - The JSON Web Token as a b64 string
  */
 
 /**
@@ -26,7 +29,7 @@ var bcrypt = require('bcrypt')
  * @param {string} req.body.username - The username of the new user
  * @param {string} req.body.password - The password of the user connecting
  * @param {string} req.body.rePassword - The password verification string to compare with password
- * @param {emptyCallback} 
+ * @param {tokenCallback} 
  */
 /* eslint-disable-next-line no-undef */
 exports.createUser = function(conData, req, callback){
@@ -52,13 +55,15 @@ exports.createUser = function(conData, req, callback){
                 }
                 var sql = "INSERT INTO Users SET ?"
                 conn.query(sql, values, function(err){
+		    conn.end()
                     if(err){
-                        conn.end()
                         callback(err)
                         return
                     } else {
-                        conn.end()
-                        callback(null)
+			var token = jwt.sign({"username":req.body["username"]}, config.secret, {
+			    expiresIn: 86400
+			})
+                        callback(null, token)
                         return
                     }
                 })
@@ -77,7 +82,7 @@ exports.createUser = function(conData, req, callback){
  * @param {Object} req - The request object sent from ExpressJS
  * @param {string} req.body.username - The username of the user connecting
  * @param {string} req.body.password - The password of the user connecting
- * @param {emptyCallback} 
+ * @param {tokenCallback} 
  */
 /* eslint-disable-next-line no-undef */
 exports.authenticateUser = function(conData, req, callback){
@@ -85,7 +90,7 @@ exports.authenticateUser = function(conData, req, callback){
         if (err) {
             callback(err)
         } else {
-            var sql = "SELECT username, password FROM Users WHERE username = ?"
+            var sql = "SELECT username, password, isAdmin FROM Users WHERE username = ?"
             var data = req.body['username']
             conn.query(sql, data, function(err, result){
                 if(err){
@@ -105,7 +110,16 @@ exports.authenticateUser = function(conData, req, callback){
                                 callback(authErr)
                                 return
                             } else {
-                                callback(null)
+				if(result[0].isAdmin === null){
+				    var token = jwt.sign({"username": req.body["username"]}, config.secret, {
+					expiresIn: 86400
+				    })
+				} else {
+				    var token = jwt.sign({"username": req.body["username"], "isAdmin": true}, config.secret, {
+					expiresIn: 86400
+				    })
+				}
+				callback(null, token)
                                 return
                             }
                         })

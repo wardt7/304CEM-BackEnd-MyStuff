@@ -181,15 +181,12 @@ app.get('/createTables', (req, res) => {
  * @bodyparam {string} rePassword - The password verification string to compare with password
  */
 app.post('/users', (req, res) => {
-    uh.createUser(databaseData, req, function(err){
+    uh.createUser(databaseData, req, function(err, token){
         if(err){
             res.status(500)
             res.json({"errMessage": err.message})
             res.end()
         } else {
-            var token = jwt.sign({"username":req.body["username"]}, config.secret, {
-                expiresIn: 86400
-            })
             res.status(201)
             res.json({"auth": true, "token": token})
             res.end()
@@ -205,15 +202,12 @@ app.post('/users', (req, res) => {
  * @bodyparam {string} password - The password for the user
  */
 app.post('/users/login', (req, res) => {
-    uh.authenticateUser(databaseData, req, function(err){
+    uh.authenticateUser(databaseData, req, function(err, token){
         if(err){
             res.status(401)
             res.json({"errMessage": err.message})
             res.end()
         } else {
-            var token = jwt.sign({"username": req.body["username"]}, config.secret, {
-                expiresIn: 86400
-            })
             res.status(200)
             res.json({"auth": true, "token": token})
             res.end()
