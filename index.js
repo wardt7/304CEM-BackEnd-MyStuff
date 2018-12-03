@@ -28,11 +28,12 @@ app.set("views", "html")
 app.set("view engine", "html")
 
 var port = 8080
+// Having to use unit test db for now as production is currently dead
 const databaseData = {
     host:"sql2.freemysqlhosting.net",
-    user:"sql2264805",
-    password:"tE8!pB7*",
-    database:"sql2264805"
+    user:"sql2267793",
+    password:"mZ2*dU8!",
+    database:"sql2267793"
 }
 
 
