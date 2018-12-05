@@ -82,6 +82,7 @@ exports.addProduct = function(conData, req, username, callback){
             } else {
                 data.end()
                 callback(err, ID)
+		return
             }
         })
     })
@@ -122,6 +123,7 @@ exports.addImage = function(conData, fileData, callback){
                     } else {
                         data.end()
                         callback(null, fileData.ID)
+			return
                     }
                 })
             })
@@ -175,6 +177,7 @@ exports.getAllProducts = function(conData, req, callback){
                 JSONToReturn.content.push(product)
             })
             callback(err, JSONToReturn)
+	    return
         })
     })
 }
@@ -223,6 +226,7 @@ exports.deleteProduct = function(conData, id, decoded, callback){
                      * just a cleanup function. 
                      */
                     callback(null, id)
+		    return
                 })
             }
         })

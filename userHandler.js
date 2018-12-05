@@ -89,6 +89,7 @@ exports.authenticateUser = function(conData, req, callback){
     db.connect(conData, function(err, conn){
         if (err) {
             callback(err)
+	    return
         } else {
             var sql = "SELECT username, password, isAdmin FROM Users WHERE username = ?"
             var data = req.body["username"]

@@ -71,9 +71,11 @@ exports.createMessage = function(conData, req, fromUser, callback){
                 if (err) {
                     conn.end()
                     callback(err)
+		    return
                 } else {
                     conn.end()
                     callback(null)
+		    return
                 }
             })
         }
@@ -102,6 +104,7 @@ exports.getMessages = function(conData, username, callback){
                 if (err){
                     conn.end()
                     callback(err)
+		    return
                 } else {
                     conn.end()
                     var JSONToReturn = { "content": [] }
@@ -116,6 +119,7 @@ exports.getMessages = function(conData, username, callback){
                         JSONToReturn.content.push(msg)
                     })
                     callback(err, JSONToReturn)
+		    return
                 }
             })
         }
@@ -153,11 +157,14 @@ exports.deleteMessage = function(conData, id, decoded, callback){
                 conn.end()
                 if (err){
                     callback(err)
+		    return
                 } else if (result.affectedRows === 0){
                     var emptyErr = new Error("Didn't delete anything, is messageID and toUser correct?")
                     callback(emptyErr)
+		    return
                 } else {
                     callback(err, id)
+		    return
                 }
             })
         }
