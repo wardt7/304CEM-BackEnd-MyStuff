@@ -261,12 +261,11 @@ app.get("/messages", (req, res) => {
             res.json({"errMessage": err.message})
             res.end()
         } else {
-            var toUser = ""
-            if(decoded.hasOwnProperty("isAdmin")){
+            if(decoded.hasOwnProperty("isAdmin") && typeof req.query.toUser !== 'undefined'){
 		/* eslint-disable-next-line prefer-destructuring */
-                toUser = req.query.toUser
+                var toUser = req.query.toUser
             } else {
-                toUser = decoded.username
+                var toUser = decoded.username
             }
             mh.getMessages(databaseData, toUser, function(err, data){
                 if(err){
